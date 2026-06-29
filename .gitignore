@@ -1,0 +1,11 @@
+.env
+backend/.env
+backend/instance/
+*.pyc
+__pycache__/
+node_modules/
+dist/
+.venv/
+*.log
+.agents/
+.codex/
