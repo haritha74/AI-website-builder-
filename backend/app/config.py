@@ -8,12 +8,23 @@ load_dotenv()
 
 
 def _database_url():
-    url = os.getenv("DATABASE_URL", "sqlite:///ai_website_builder.db")
+    url = os.getenv("DATABASE_URL") or _tidb_database_url() or "sqlite:///ai_website_builder.db"
     if url.startswith("mysql://"):
         url = url.replace("mysql://", "mysql+pymysql://", 1)
     if _truthy(os.getenv("REQUIRE_SQL_DATABASE")) and url.startswith("sqlite"):
         raise RuntimeError("REQUIRE_SQL_DATABASE=true but DATABASE_URL is SQLite. Use a hosted MySQL DATABASE_URL.")
     return url
+
+
+def _tidb_database_url():
+    host = os.getenv("TIDB_HOST")
+    port = os.getenv("TIDB_PORT")
+    user = os.getenv("TIDB_USER")
+    password = os.getenv("TIDB_PASSWORD")
+    database = os.getenv("TIDB_DATABASE")
+    if all([host, port, user, password, database]):
+        return f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
+    return None
 
 
 def _sqlalchemy_engine_options():

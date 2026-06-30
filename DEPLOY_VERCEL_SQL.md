@@ -8,6 +8,11 @@ Set these in the Vercel project settings:
 
 ```env
 DATABASE_URL=mysql+pymysql://USER:PASSWORD@HOST:PORT/DATABASE_NAME
+TIDB_HOST=
+TIDB_PORT=
+TIDB_USER=
+TIDB_PASSWORD=
+TIDB_DATABASE=
 REQUIRE_SQL_DATABASE=true
 MYSQL_SSL=true
 MYSQL_SSL_CA=
@@ -22,6 +27,8 @@ FRONTEND_ORIGIN=https://ai-website-builder-g84h.vercel.app
 ```
 
 If your MySQL provider gives you a CA certificate, paste the full certificate text into `MYSQL_SSL_CA` and keep `MYSQL_SSL=true`.
+
+For TiDB Cloud's Vercel integration, you can leave `DATABASE_URL` empty if Vercel adds `TIDB_HOST`, `TIDB_PORT`, `TIDB_USER`, `TIDB_PASSWORD`, and `TIDB_DATABASE`.
 
 ## After Updating Variables
 
