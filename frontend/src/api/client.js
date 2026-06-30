@@ -4,7 +4,7 @@ const renderApiHostname = import.meta.env.VITE_API_HOSTNAME;
 
 export const API_URL =
   import.meta.env.VITE_API_URL ||
-  (renderApiHostname ? `https://${renderApiHostname}/api` : "http://localhost:5000/api");
+  (renderApiHostname ? `https://${renderApiHostname}/api` : import.meta.env.PROD ? "/api" : "http://localhost:5000/api");
 
 const client = axios.create({
   baseURL: API_URL,
