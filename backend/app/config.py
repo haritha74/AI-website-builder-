@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from datetime import timedelta
 
 from dotenv import load_dotenv
@@ -6,10 +7,42 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _database_url():
+    url = os.getenv("DATABASE_URL", "sqlite:///ai_website_builder.db")
+    if url.startswith("mysql://"):
+        url = url.replace("mysql://", "mysql+pymysql://", 1)
+    if _truthy(os.getenv("REQUIRE_SQL_DATABASE")) and url.startswith("sqlite"):
+        raise RuntimeError("REQUIRE_SQL_DATABASE=true but DATABASE_URL is SQLite. Use a hosted MySQL DATABASE_URL.")
+    return url
+
+
+def _sqlalchemy_engine_options():
+    if not _database_url().startswith("mysql"):
+        return {}
+
+    ssl_ca = (os.getenv("MYSQL_SSL_CA") or "").strip()
+    ssl_enabled = _truthy(os.getenv("MYSQL_SSL"))
+
+    if ssl_ca:
+        ca_path = Path(os.getenv("MYSQL_SSL_CA_PATH", "/tmp/mysql-ca.pem"))
+        ca_path.write_text(ssl_ca.replace("\\n", "\n"), encoding="utf-8")
+        return {"connect_args": {"ssl": {"ca": str(ca_path)}}}
+
+    if ssl_enabled:
+        return {"connect_args": {"ssl": {}}}
+
+    return {}
+
+
+def _truthy(value):
+    return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "local-development-secret")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "local-development-jwt-secret")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///ai_website_builder.db")
+    SQLALCHEMY_DATABASE_URI = _database_url()
+    SQLALCHEMY_ENGINE_OPTIONS = _sqlalchemy_engine_options()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
