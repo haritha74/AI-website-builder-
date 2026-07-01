@@ -12,10 +12,16 @@ def default_database_url():
     return "sqlite:///ai_website_builder.db"
 
 
+def database_url():
+    if os.getenv("VERCEL") and os.getenv("USE_EXTERNAL_DATABASE", "false").lower() not in {"1", "true", "yes"}:
+        return "sqlite:////tmp/ai_website_builder.db"
+    return os.getenv("DATABASE_URL", default_database_url())
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "local-development-secret")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "local-development-jwt-secret")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", default_database_url())
+    SQLALCHEMY_DATABASE_URI = database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
