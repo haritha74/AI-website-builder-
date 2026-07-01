@@ -7,7 +7,32 @@ const sizes = {
 };
 
 export default function PreviewPane({ code, viewport, setViewport }) {
-  const srcDoc = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><style>${code.css}</style></head><body>${code.html}<script>${code.javascript}</script></body></html>`;
+  const guardedJavaScript = (code.javascript || "")
+    .replace(/(?:window\.)?location\.href\s*=\s*[^;\n]+;?/g, "console.warn('Preview blocked location.href navigation.');")
+    .replace(/(?:window\.)?location\.(assign|replace)\s*\([^)]*\);?/g, "console.warn('Preview blocked location navigation.');");
+
+  const previewGuard = `
+    window.open = function(url) {
+      console.warn("Preview blocked popup/navigation to", url);
+      return null;
+    };
+    document.addEventListener("click", function(event) {
+      const link = event.target.closest && event.target.closest("a[href]");
+      if (!link) return;
+      const href = link.getAttribute("href") || "";
+      if (href.startsWith("#")) return;
+      event.preventDefault();
+      console.warn("Preview blocked link navigation to", href);
+    }, true);
+    document.addEventListener("submit", function(event) {
+      event.preventDefault();
+      console.warn("Preview blocked form submission.");
+    }, true);
+    history.pushState = function() {};
+    history.replaceState = function() {};
+  `;
+
+  const srcDoc = `<!doctype html><html><head><meta charset="utf-8"/><base href="about:srcdoc"/><meta name="viewport" content="width=device-width,initial-scale=1"/><style>${code.css}</style></head><body>${code.html}<script>${previewGuard}</script><script>${guardedJavaScript}</script></body></html>`;
 
   return (
     <section className="flex min-h-[560px] flex-col overflow-hidden border border-slate-200 bg-white dark:border-line dark:bg-[#101722]">
