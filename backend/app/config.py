@@ -6,10 +6,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def default_database_url():
+    if os.getenv("VERCEL"):
+        return "sqlite:////tmp/ai_website_builder.db"
+    return "sqlite:///ai_website_builder.db"
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "local-development-secret")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "local-development-jwt-secret")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///ai_website_builder.db")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", default_database_url())
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
