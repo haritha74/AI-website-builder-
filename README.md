@@ -1,6 +1,6 @@
 # AI Website Builder
 
-Production-oriented AI website builder built with React, Vite, Tailwind CSS, Flask, SQLAlchemy, JWT authentication, and OpenAI-compatible generation.
+AI website builder built with React, Vite, Tailwind CSS, Flask, SQLAlchemy, JWT authentication, Gemini/OpenAI-compatible generation, live preview, code editing, and project export.
 
 ## Run Locally
 
@@ -25,13 +25,9 @@ npm run dev
 
 Open `http://localhost:5173`.
 
-## MySQL
+## Storage
 
-Set `DATABASE_URL=mysql+pymysql://builder:builderpassword@localhost:3306/ai_website_builder` in `backend/.env`, or start MySQL and the backend with:
-
-```bash
-docker compose up --build
-```
+The app uses SQLite by default. Local data is saved at `backend/instance/ai_website_builder.db`.
 
 ## OpenAI
 
